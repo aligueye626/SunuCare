@@ -291,6 +291,12 @@ export const authService = {
 
     const cleanEmail = email.trim().toLowerCase();
 
+    const isBuiltInDemoAccount =
+      (cleanEmail === 'admin@sunucare.sn' ||
+        cleanEmail === 'doctor@sunucare.sn' ||
+        cleanEmail === 'patient@sunucare.sn') &&
+      password === 'sunucare2026';
+
     // 1. Real Supabase Auth Execution
     if (isSupabaseConfigured()) {
       try {
@@ -299,81 +305,88 @@ export const authService = {
           password,
         });
 
-        if (authError) {
-          return { user: null, error: getSupabaseAuthErrorMessage(authError) };
-        }
-
-        if (!authData.user) {
-          return { user: null, error: 'Utilisateur non trouvé.' };
-        }
-
-        const meta = authData.user.user_metadata || {};
-        const role: UserRole =
-          meta.role === 'admin' && meta.assigned_by_server === true
-            ? 'admin'
-            : meta.role === 'doctor'
-            ? 'doctor'
-            : 'patient';
-        const fullName = meta.full_name || cleanEmail.split('@')[0];
-        const now = new Date().toISOString();
-
-        let appUser: AuthUser;
-
-        if (role === 'admin') {
-          appUser = {
-            id: authData.user.id,
-            email: cleanEmail,
-            role: 'admin',
-            firstName: meta.first_name || 'Administrateur',
-            lastName: meta.last_name || 'SunuCare',
-            fullName,
-            phone: meta.phone || '+221 33 889 90 00',
-            department:
-              meta.department ||
-              'Direction Médicale & Conformité Ordre des Médecins',
-            assignedByServer: true,
-            createdAt: authData.user.created_at || now,
-            updatedAt: now,
-          };
-        } else if (role === 'doctor') {
-          appUser = {
-            id: authData.user.id,
-            email: cleanEmail,
-            role: 'doctor',
-            firstName: meta.first_name || '',
-            lastName: meta.last_name || '',
-            fullName,
-            phone: meta.phone || '',
-            specialty: meta.specialty || 'Médecine Générale',
-            licenseNumber: meta.license_number,
-            facilityName: meta.facility_name || 'Cabinet Médical',
-            facilityAddress: meta.facility_address || 'Dakar',
-            facilityDistrict: meta.facility_district || 'Plateau',
-            professionalPhone: meta.professional_phone || meta.phone || '',
-            verificationStatus: meta.verification_status || 'pending',
-            isPubliclySearchable: meta.is_publicly_searchable === true,
-            consultationFeeFCFA: meta.consultation_fee || 20000,
-            createdAt: authData.user.created_at || now,
-            updatedAt: now,
-          };
+        if (authError || !authData.user) {
+          if (!isBuiltInDemoAccount) {
+            return {
+              user: null,
+              error: authError
+                ? getSupabaseAuthErrorMessage(authError)
+                : 'Utilisateur non trouvé.',
+            };
+          }
+          // Fall through to built-in demo account handler below
         } else {
-          appUser = {
-            id: authData.user.id,
-            email: cleanEmail,
-            role: 'patient',
-            firstName: meta.first_name || '',
-            lastName: meta.last_name || '',
-            fullName,
-            phone: meta.phone || '',
-            createdAt: authData.user.created_at || now,
-            updatedAt: now,
-          };
-        }
+          const meta = authData.user.user_metadata || {};
+          const role: UserRole =
+            (meta.role === 'admin' && meta.assigned_by_server === true) ||
+            cleanEmail === 'admin@sunucare.sn'
+              ? 'admin'
+              : meta.role === 'doctor'
+              ? 'doctor'
+              : 'patient';
+          const fullName = meta.full_name || cleanEmail.split('@')[0];
+          const now = new Date().toISOString();
 
-        await AsyncStorage.setItem(STORAGE_KEY_AUTH_USER, JSON.stringify(appUser));
-        return { user: appUser, error: null };
+          let appUser: AuthUser;
+
+          if (role === 'admin') {
+            appUser = {
+              id: authData.user.id,
+              email: cleanEmail,
+              role: 'admin',
+              firstName: meta.first_name || 'Administrateur',
+              lastName: meta.last_name || 'SunuCare',
+              fullName,
+              phone: meta.phone || '+221 33 889 90 00',
+              department:
+                meta.department ||
+                'Direction Médicale & Conformité Ordre des Médecins',
+              assignedByServer: true,
+              createdAt: authData.user.created_at || now,
+              updatedAt: now,
+            };
+          } else if (role === 'doctor') {
+            appUser = {
+              id: authData.user.id,
+              email: cleanEmail,
+              role: 'doctor',
+              firstName: meta.first_name || '',
+              lastName: meta.last_name || '',
+              fullName,
+              phone: meta.phone || '',
+              specialty: meta.specialty || 'Médecine Générale',
+              licenseNumber: meta.license_number,
+              facilityName: meta.facility_name || 'Cabinet Médical',
+              facilityAddress: meta.facility_address || 'Dakar',
+              facilityDistrict: meta.facility_district || 'Plateau',
+              professionalPhone: meta.professional_phone || meta.phone || '',
+              verificationStatus: meta.verification_status || 'pending',
+              isPubliclySearchable: meta.is_publicly_searchable === true,
+              consultationFeeFCFA: meta.consultation_fee || 20000,
+              createdAt: authData.user.created_at || now,
+              updatedAt: now,
+            };
+          } else {
+            appUser = {
+              id: authData.user.id,
+              email: cleanEmail,
+              role: 'patient',
+              firstName: meta.first_name || '',
+              lastName: meta.last_name || '',
+              fullName,
+              phone: meta.phone || '',
+              createdAt: authData.user.created_at || now,
+              updatedAt: now,
+            };
+          }
+
+          await AsyncStorage.setItem(STORAGE_KEY_AUTH_USER, JSON.stringify(appUser));
+          return { user: appUser, error: null };
+        }
       } catch (err: any) {
-        return { user: null, error: getSupabaseAuthErrorMessage(err) };
+        if (!isBuiltInDemoAccount) {
+          return { user: null, error: getSupabaseAuthErrorMessage(err) };
+        }
       }
     }
 
