@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { BorderRadius, Colors, Spacing, Typography } from '@/constants/theme';
 import { PrimaryButton } from '@/components/common/PrimaryButton';
 import { SecondaryButton } from '@/components/common/SecondaryButton';
@@ -14,9 +14,12 @@ import { formatToSenegalPhone } from '@/utils/validators';
 
 export default function RegisterScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ role?: string }>();
   const { register, isLoading } = useAuth();
 
-  const [role, setRole] = useState<UserRole>('patient');
+  const [role, setRole] = useState<UserRole>(
+    params.role === 'doctor' ? 'doctor' : 'patient'
+  );
 
   // Shared fields
   const [firstName, setFirstName] = useState('');

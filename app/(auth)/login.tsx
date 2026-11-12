@@ -47,7 +47,11 @@ export default function LoginScreen() {
 
   return (
     <ScreenWrapper scrollable>
-      <CustomHeader showBack title="Connexion" />
+      <CustomHeader
+        showBack
+        title="Connexion"
+        onBackPress={() => router.replace('/')}
+      />
 
       <View style={styles.content}>
         {/* Header Branding */}
@@ -93,6 +97,8 @@ export default function LoginScreen() {
               if (errorMessage) setErrorMessage('');
             }}
             secureTextEntry
+            returnKeyType="done"
+            onSubmitEditing={handleLogin}
             leftIcon={
               <MaterialCommunityIcons
                 name="lock-outline"

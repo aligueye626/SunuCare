@@ -154,21 +154,35 @@ export default function PatientProfileScreen() {
         >
           <View style={styles.headerRow}>
             <Text style={styles.title}>Mon Profil Patient</Text>
-            {!isEditing && (
+            {isDoctor ? (
               <Pressable
-                onPress={() => {
-                  setSaveSuccess(null);
-                  setIsEditing(true);
-                }}
+                onPress={() => router.replace('/doctor-space/dashboard')}
                 style={styles.editTriggerBtn}
               >
                 <MaterialCommunityIcons
-                  name="account-edit-outline"
+                  name="arrow-left"
                   size={18}
                   color={Colors.primary}
                 />
-                <Text style={styles.editTriggerText}>Modifier</Text>
+                <Text style={styles.editTriggerText}>Espace Praticien</Text>
               </Pressable>
+            ) : (
+              !isEditing && (
+                <Pressable
+                  onPress={() => {
+                    setSaveSuccess(null);
+                    setIsEditing(true);
+                  }}
+                  style={styles.editTriggerBtn}
+                >
+                  <MaterialCommunityIcons
+                    name="account-edit-outline"
+                    size={18}
+                    color={Colors.primary}
+                  />
+                  <Text style={styles.editTriggerText}>Modifier</Text>
+                </Pressable>
+              )
             )}
           </View>
 

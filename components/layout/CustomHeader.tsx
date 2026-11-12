@@ -8,7 +8,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { Colors, Spacing, Typography } from '@/constants/theme';
 
 export interface CustomHeaderProps {
@@ -33,12 +33,37 @@ export function CustomHeader({
   titleColor = Colors.text,
 }: CustomHeaderProps) {
   const router = useRouter();
+  const segments = useSegments();
 
   const handleBack = () => {
     if (onBackPress) {
       onBackPress();
-    } else if (router.canGoBack()) {
+      return;
+    }
+
+    if (router.canGoBack()) {
       router.back();
+      return;
+    }
+
+    // Fallback when history stack is empty (e.g. after router.replace or Web refresh)
+    const firstSegment = segments[0] as string | undefined;
+    const secondSegment = segments[1] as string | undefined;
+
+    if (firstSegment === '(auth)') {
+      if (secondSegment === 'register' || secondSegment === 'forgot-password') {
+        router.replace('/(auth)/login');
+      } else {
+        router.replace('/');
+      }
+    } else if (firstSegment === 'doctor-space') {
+      router.replace('/doctor-space/dashboard');
+    } else if (firstSegment === 'admin-space') {
+      router.replace('/admin-space/dashboard' as any);
+    } else if (firstSegment === 'appointments') {
+      router.replace('/(tabs)/appointments');
+    } else {
+      router.replace('/(tabs)');
     }
   };
 

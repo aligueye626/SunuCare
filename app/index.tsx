@@ -118,7 +118,7 @@ export default function WelcomeScreen() {
         <View style={styles.actionsSection}>
           <PrimaryButton
             title="Commencer"
-            onPress={() => router.push('/(tabs)')}
+            onPress={() => router.push('/(auth)/login')}
             size="lg"
             fullWidth
             rightIcon={
@@ -146,7 +146,7 @@ export default function WelcomeScreen() {
 
         {/* Doctor Partnership Footer Banner */}
         <Pressable
-          onPress={() => router.push('/(auth)/register')}
+          onPress={() => router.push('/(auth)/register?role=doctor' as any)}
           style={({ pressed }) => [
             styles.doctorBanner,
             pressed && styles.doctorBannerPressed,

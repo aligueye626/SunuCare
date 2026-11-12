@@ -286,6 +286,43 @@ export default function PatientSearchScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
+      {user?.role === 'doctor' && (
+        <Pressable
+          onPress={() => router.replace('/doctor-space/dashboard')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: Colors.secondaryLight,
+            paddingHorizontal: Spacing.base,
+            paddingVertical: 10,
+            borderBottomWidth: 1,
+            borderBottomColor: 'rgba(20, 125, 117, 0.25)',
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <MaterialCommunityIcons
+              name="arrow-left-circle"
+              size={20}
+              color={Colors.primaryDark}
+            />
+            <Text
+              style={{
+                fontSize: Typography.fontSize.xs,
+                fontWeight: Typography.fontWeight.bold,
+                color: Colors.primaryDark,
+              }}
+            >
+              Retourner à mon Tableau de bord Praticien
+            </Text>
+          </View>
+          <MaterialCommunityIcons
+            name="chevron-right"
+            size={18}
+            color={Colors.primaryDark}
+          />
+        </Pressable>
+      )}
       {/* Search Header */}
       <View style={styles.header}>
         <View style={styles.titleRow}>

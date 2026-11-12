@@ -255,7 +255,11 @@ export default function AppointmentBookingScreen() {
   if (confirmedAppointment) {
     return (
       <ScreenWrapper scrollable>
-        <CustomHeader showBack={false} title="Confirmation de réservation" />
+        <CustomHeader
+          showBack
+          title="Confirmation de réservation"
+          onBackPress={() => router.replace('/(tabs)/appointments')}
+        />
 
         <View style={styles.content}>
           <Card padding="lg" style={styles.confirmationHeroCard}>
