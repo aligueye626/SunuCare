@@ -48,7 +48,7 @@ const MEDICAL_SPECIALTIES = [
 ];
 
 export default function DoctorProfileManagementScreen() {
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, logout } = useAuth();
   const doctor = user as DoctorProfile | null;
 
   const [fullName, setFullName] = useState(
@@ -565,6 +565,22 @@ export default function DoctorProfileManagementScreen() {
           fullWidth
           style={styles.saveBtn}
         />
+
+        <Pressable
+          onPress={async () => {
+            await logout();
+          }}
+          style={styles.signOutBtn}
+        >
+          <MaterialCommunityIcons
+            name="logout"
+            size={18}
+            color={Colors.error}
+          />
+          <Text style={styles.signOutText}>
+            Se déconnecter de l’Espace Praticien
+          </Text>
+        </Pressable>
       </View>
     </ScreenWrapper>
   );
@@ -733,5 +749,20 @@ const styles = StyleSheet.create({
   },
   saveBtn: {
     marginTop: Spacing.md,
+  },
+  signOutBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.xs,
+    paddingVertical: Spacing.md,
+    marginTop: Spacing.md,
+    backgroundColor: Colors.errorLight,
+    borderRadius: BorderRadius.lg,
+  },
+  signOutText: {
+    fontSize: Typography.fontSize.sm,
+    fontWeight: Typography.fontWeight.bold,
+    color: Colors.error,
   },
 });

@@ -127,7 +127,33 @@ export default function DoctorDashboardScreen() {
     );
   };
 
-  const handleQuickReject = (apt: Appointment) => {
+  const handleQuickReject = async (apt: Appointment) => {
+    const executeReject = async () => {
+      setProcessingId(apt.id);
+      const { error: rejectError } =
+        await appointmentService.rejectAppointment(
+          apt.id,
+          'Créneau indisponible au planning du praticien',
+          doctorId
+        );
+      setProcessingId(null);
+      if (rejectError) {
+        Alert.alert('Erreur', rejectError);
+      } else {
+        await loadDoctorDashboard(true);
+      }
+    };
+
+    if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+      const confirmed = window.confirm(
+        `Souhaitez-vous décliner la demande de ${apt.patientName || 'ce patient'} du ${formatDateShortFr(apt.date)} à ${apt.time} ?`
+      );
+      if (confirmed) {
+        await executeReject();
+      }
+      return;
+    }
+
     Alert.alert(
       'Refuser cette demande ?',
       `Souhaitez-vous décliner la demande de ${apt.patientName || 'ce patient'} du ${formatDateShortFr(apt.date)} à ${apt.time} ?`,
@@ -136,37 +162,14 @@ export default function DoctorDashboardScreen() {
         {
           text: 'Refuser la demande',
           style: 'destructive',
-          onPress: async () => {
-            setProcessingId(apt.id);
-            const { error: rejectError } =
-              await appointmentService.rejectAppointment(
-                apt.id,
-                'Créneau indisponible au planning du praticien',
-                doctorId
-              );
-            setProcessingId(null);
-            if (rejectError) {
-              Alert.alert('Erreur', rejectError);
-            } else {
-              await loadDoctorDashboard(true);
-            }
-          },
+          onPress: executeReject,
         },
       ]
     );
   };
 
-  const handleSignOut = () => {
-    Alert.alert('Déconnexion', 'Quitter l’Espace Praticien SunuCare ?', [
-      { text: 'Annuler', style: 'cancel' },
-      {
-        text: 'Déconnexion',
-        style: 'destructive',
-        onPress: async () => {
-          await logout();
-        },
-      },
-    ]);
+  const handleSignOut = async () => {
+    await logout();
   };
 
   if (isLoading) {
@@ -288,6 +291,27 @@ export default function DoctorDashboardScreen() {
                 uri={doctor?.avatarUrl}
                 size="md"
                 verified={isVerified}
+              />
+            </Pressable>
+
+            <Pressable
+              onPress={handleSignOut}
+              style={{
+                width: 42,
+                height: 42,
+                borderRadius: 21,
+                backgroundColor: Colors.errorLight,
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderWidth: 1,
+                borderColor: 'rgba(239, 68, 68, 0.25)',
+              }}
+              accessibilityLabel="Se déconnecter"
+            >
+              <MaterialCommunityIcons
+                name="logout"
+                size={20}
+                color={Colors.error}
               />
             </Pressable>
           </View>

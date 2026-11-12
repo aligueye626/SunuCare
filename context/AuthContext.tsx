@@ -55,13 +55,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inTabsGroup = segments[0] === '(tabs)';
     const inDoctorSpace = segments[0] === 'doctor-space';
     const inAdminSpace = (segments[0] as string) === 'admin-space';
     const isWelcomeScreen = !segments[0] || (segments[0] as string) === 'index';
 
     if (!user) {
-      // If unauthenticated and trying to access protected doctor or admin space, send to login
-      if (inDoctorSpace || inAdminSpace) {
+      // If unauthenticated and trying to access protected patient, doctor, or admin space, send to login
+      if (inTabsGroup || inDoctorSpace || inAdminSpace) {
         router.replace('/(auth)/login');
       }
     } else {
@@ -157,7 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       await authService.logout();
       setUser(null);
-      router.replace('/');
+      router.replace('/(auth)/login');
     } finally {
       setIsLoading(false);
     }

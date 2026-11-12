@@ -56,7 +56,36 @@ export default function MyAppointmentsScreen() {
     }, [loadAppointments])
   );
 
-  const handleCancelAppointment = (apt: Appointment) => {
+  const handleCancelAppointment = async (apt: Appointment) => {
+    const executeCancel = async () => {
+      const { error: cancelError } =
+        await appointmentService.cancelAppointment(
+          apt.id,
+          'patient',
+          'Annulé par le patient depuis son espace',
+          patientId
+        );
+      if (cancelError) {
+        Alert.alert('Erreur', cancelError);
+      } else {
+        await loadAppointments(true);
+        Alert.alert(
+          'Rendez-vous annulé',
+          'Votre rendez-vous a été annulé et le créneau horaire a été libéré.'
+        );
+      }
+    };
+
+    if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+      const confirmed = window.confirm(
+        `Souhaitez-vous vraiment annuler votre consultation avec ${apt.doctorName} prévue le ${formatDateShortFr(apt.date)} à ${apt.time} ? Le créneau sera immédiatement libéré.`
+      );
+      if (confirmed) {
+        await executeCancel();
+      }
+      return;
+    }
+
     Alert.alert(
       'Annuler ce rendez-vous ?',
       `Souhaitez-vous vraiment annuler votre consultation avec ${apt.doctorName} prévue le ${formatDateShortFr(apt.date)} à ${apt.time} ? Le créneau sera immédiatement libéré.`,
@@ -65,24 +94,7 @@ export default function MyAppointmentsScreen() {
         {
           text: 'Oui, annuler',
           style: 'destructive',
-          onPress: async () => {
-            const { error: cancelError } =
-              await appointmentService.cancelAppointment(
-                apt.id,
-                'patient',
-                'Annulé par le patient depuis son espace',
-                patientId
-              );
-            if (cancelError) {
-              Alert.alert('Erreur', cancelError);
-            } else {
-              await loadAppointments(true);
-              Alert.alert(
-                'Rendez-vous annulé',
-                'Votre rendez-vous a été annulé et le créneau horaire a été libéré.'
-              );
-            }
-          },
+          onPress: executeCancel,
         },
       ]
     );

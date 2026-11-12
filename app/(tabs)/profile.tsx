@@ -137,21 +137,8 @@ export default function PatientProfileScreen() {
     setIsEditing(false);
   };
 
-  const handleSignOut = () => {
-    Alert.alert(
-      'Déconnexion',
-      'Souhaitez-vous vous déconnecter de votre compte SunuCare ?',
-      [
-        { text: 'Annuler', style: 'cancel' },
-        {
-          text: 'Se déconnecter',
-          style: 'destructive',
-          onPress: async () => {
-            await logout();
-          },
-        },
-      ]
-    );
+  const handleSignOut = async () => {
+    await logout();
   };
 
   return (
